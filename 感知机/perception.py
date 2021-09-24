@@ -49,19 +49,16 @@ def getErrorPoint(x, y, w, b):
 
 if __name__=="__main__":
     # 训练数据
-    x = np.array([[3,3],[4,3],[1,1]])
-    y = np.array([1,1,-1])
-    
+    x = np.array([[3,3],[4,3],[1,1],[7,8],[2,5],[4,5]])
+    y = np.array([1,1,-1,1,-1,-1])
+    x_lim = 10
+    y_lim = 10
     # 权重初始化
     w = np.array([0,0])
     # 偏差初始化
     b = 0
     # 学习率 0 < lr <= 1
     lr = 0.5
-    # 绘制训练数据散点图
-    for i in range(len(x)):
-        plt.close()
-        plt.scatter(x[:,0],x[:,1])
     
     # 训练
     Point, label = getErrorPoint(x,y,w,b)
@@ -70,14 +67,18 @@ if __name__=="__main__":
         w,b = update(w,b,Point[i],label[i],lr)
         Point,label = getErrorPoint(x,y,w,b)
     
+    # 绘制训练数据散点图
+    plt.close()
+    for i in range(len(x)):
+        plt.scatter(x[:,0],x[:,1])
     # 绘制最终的分类超平面
     if w[1]!=0 and w[0]!=0:
-        px = np.linspace(0,5,100)
+        px = np.linspace(0,x_lim,100)
         py = -(w[0]*px+b)/w[1]
         plt.plot(px,py)
     elif w[1]==0 and w[0]!=0:
         plt.axvline(-b/w[0])
     else:
         plt.axhline(-b/w[1])
-    plt.ylim([0,5])
-    plt.xlim([0,5])
+    plt.ylim([0,y_lim])
+    plt.xlim([0,x_lim])
