@@ -8,8 +8,13 @@ Created on Thu Sep 30 15:49:57 2021
 import numpy as np
 import math
 
+"""
+构造KDTree
+遍历树
+寻找给定值的最近邻叶子节点，以及搜寻树中的最近邻
+"""
 class KDTree():
-    def __init__(self, value, depth, parent=None):
+    def __init__(self, value, depth=0, parent=None):
         """
         value: KDTree 下的所有节点的集合
         depth: 当前节点的深度
@@ -115,11 +120,17 @@ class KDTree():
                 return self.right.findNeibor(point)
             else:
                 return self
+            
     # 返回KD树中 给定点的 最近邻 节点
-    def searchKNeibor(self, point):
+    def searchNeibor(self, point):
         leaf = self.findNeibor(point)
         current = leaf
 
+        distanceOfleaf = 0
+        for i in range(len(leaf.key)):
+            distanceOfleaf += (leaf.key[i] - point[i])**2
+        distanceOfleaf = math.sqrt(distanceOfleaf)
+        
         while current != self:
             parent = current.getParent()
             
@@ -135,7 +146,7 @@ class KDTree():
             
             if distanceOfparent < distanceOfleaf:
                 leaf = parent
-                distanceOfbro = 0 
+                distanceOfbro = 0
                 bro = current.getBro()
                 if bro:
                     for i in range(len(bro.key)):
@@ -143,7 +154,51 @@ class KDTree():
                     distanceOfbro = math.sqrt(distanceOfbro)
           
                     if distanceOfbro < distanceOfparent:
-                        leaf = bro.searchKNeibor(point)
-
+                        leaf = bro.searchNeibor(point)
+            
             current = parent
+        
         return leaf
+    
+    # 二分查找
+    def binarySearch(self, arr, target):
+        left = 0
+        right = np.size(arr, 0) - 1
+        
+        while right > left:
+            mid = (int)((left + right) / 2)
+            if target > arr[mid]:
+                left = mid + 1
+            else:
+                right = mid
+                
+        return left
+
+"""
+构造KDTree,查找给定值的K近邻
+"""
+class KNearestNeibor():
+    def __init__(self, values):
+        """
+        values: 训练数据，构造KDTree
+        """
+        self.values = values
+        self.tree = KDTree(self.values)
+        self.neibors = []
+    
+    def searchNeibors(self, point, k):
+        """
+        point: 给定值
+        k: k个最近邻
+        """
+        values = self.values
+        
+        for i in range(k):
+            self.tree = KDTree(values)
+            nearest = self.tree.searchNeibor(point)
+            self.neibors.append(nearest.key)
+            values = values.tolist()
+            values.remove(nearest.key.tolist())
+            values = np.array(values)
+
+        return self.neibors
